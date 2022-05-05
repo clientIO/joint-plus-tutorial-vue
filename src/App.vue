@@ -101,8 +101,7 @@ const appendGraph = async (index: number) => {
   const currentTab = tabsData.value[index];
 
   const paper = new dia.Paper({
-    // @ts-ignore
-    model: tabsData.value[index].graph,
+    model: tabsData.value[index].graph as dia.Graph,
     background: {
       color: '#F8F9FA',
     },
