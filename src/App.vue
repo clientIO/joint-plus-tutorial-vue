@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, shallowRef, onMounted, nextTick } from 'vue'
+import { ref, shallowRef, onMounted, nextTick, triggerRef } from 'vue'
 import { Tabs, Tab, TabPanels, TabPanel } from 'vue3-tabs';
 import { TabsDataRaw } from './tabs-data';
 import { dia, ui, shapes, util, g } from '@clientio/rappid';
@@ -54,7 +54,10 @@ const isTabActive = (index: number) => selectedTab.value === index;
 /**
  * Remove a tab at the specified index
  */
-const removeTab = (index: number) => tabsData.value.splice(index, 1);
+const removeTab = (index: number) => {
+  tabsData.value.splice(index, 1);
+  triggerRef(tabsData);
+}
 /**
  * Add a new tab with placeholder content
  */
@@ -110,10 +113,7 @@ const appendGraph = async (index: number) => {
     gridSize: 10,
     cellViewNamespace: shapes,
     defaultConnectionPoint: {
-      name: 'boundary',
-        args: {
-          offset: 0
-        }
+      name: 'boundary'
     }
   });
   const scroller = new ui.PaperScroller({
