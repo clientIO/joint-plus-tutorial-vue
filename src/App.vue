@@ -1,79 +1,182 @@
-<template>
-  <div class="canvas" ref="canvas"></div>
-</template>
+<script lang="ts" setup>
+import { ref, onMounted, nextTick } from 'vue'
+import { Tabs, Tab, TabPanels, TabPanel } from 'vue3-tabs';
+import { TabsDataRaw } from './tabs-data';
+import { dia, ui, shapes, util, g } from '@clientio/rappid';
+import HyperlinkHighlighter from './hyperlink-highlighter';
 
-<script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { dia, ui, shapes } from '@clientio/rappid';
+interface TabData {
+  title: string;
+  graph:  dia.Graph,
+  focusPoint?: g.PlainPoint
+}
 
-@Options({})
-export default class App extends Vue {
-  declare public $refs: {
-   canvas: HTMLDivElement;
+const theme = 'material';
+
+onMounted(() => {
+  appendGraph(0);
+  const appEl = document.querySelector('#app');
+
+  if (!appEl) return;
+
+  new ui.Tooltip({
+    theme,
+    rootTarget: appEl,
+    container: appEl,
+    target: '[data-tooltip]',
+    direction: ui.Tooltip.TooltipArrowPosition.Auto,
+    position: ui.Tooltip.TooltipPosition.Top,
+    padding: 10,
+    animation: true
+  });
+});
+
+const selectedTab = ref(0);
+const tabsData = ref<TabData[]>([]);
+const panelRefs = ref<InstanceType<typeof TabPanel>[]>([]);
+
+/**
+ * Create default tab state
+ */
+tabsData.value = TabsDataRaw.map(({ title, json }) => {
+  const graph = new dia.Graph({ id: util.uuid() }, { cellNamespace: shapes });
+  graph.fromJSON(json);
+  const focusPoint = graph.getBBox()?.center().toJSON();
+
+  return {
+    title,
+    graph,
+    focusPoint,
   }
+});
 
-  private graph: dia.Graph;
-  private paper: dia.Paper;
-  private scroller: ui.PaperScroller;
+const isTabActive = (index: number) => selectedTab.value === index;
+/**
+ * Remove a tab at the specified index
+ */
+const removeTab = (index: number) => tabsData.value.splice(index, 1);
+/**
+ * Add a new tab with placeholder content
+ */
+const addTab = () => {
+  tabsData.value.push({
+    title: `Tab ${tabsData.value.length + 1}`,
+    graph: new dia.Graph({ id: util.uuid() }, { cellNamespace: shapes }),
+  });
 
-  public created(): void {
-    const graph = this.graph = new dia.Graph({}, { cellNamespace: shapes });
+  const index = tabsData.value.length - 1;
+  selectedTab.value = index;
 
-    const paper = this.paper = new dia.Paper({
-        model: graph,
-        background: {
-            color: '#F8F9FA',
-        },
-        frozen: true,
-        async: true,
-        cellViewNamespace: shapes
-    });
+  appendGraph(index);
+}
 
-    const scroller = this.scroller = new ui.PaperScroller({
-        paper,
-        autoResizePaper: true,
-        cursor: 'grab'
-    });
-
-    scroller.render();
-
-    const rect = new shapes.standard.Rectangle({
-        position: { x: 100, y: 100 },
-        size: { width: 100, height: 50 },
-        attrs: {
-            label: {
-                text: 'Hello World'
-            }
-        }
-    });
-
-    this.graph.addCell(rect);
+const tabChanged = (currentTabIndex: number) => {
+  if (currentTabIndex >= tabsData.value.length) {
+    selectedTab.value = tabsData.value.length - 1;
+    currentTabIndex = tabsData.value.length - 1;
   }
+  appendGraph(currentTabIndex);
+}
 
-  public mounted(): void {
-    const { scroller, paper, $refs : { canvas } } = this;
-    canvas.appendChild(this.scroller.el);
+const selectGraph = (graphId: string) => {
+  const index = tabsData.value.findIndex(({ graph }) => graph.id === graphId);
+  if (index > -1) {
+    selectedTab.value = index;
+    appendGraph(index);
+  } else {
+    const message = new ui.FlashMessage({
+      theme,
+      content: `Invalid sub-process ID: ${graphId}`,
+    });
+    message.open();
+  }
+}
+
+/**
+ * Mounts the content of the tab and sets the focus point.
+ */
+const appendGraph = async (index: number) => {
+  if (!tabsData.value.length) return;
+  await nextTick();
+  const currentTab = tabsData.value[index];
+
+  const paper = new dia.Paper({
+    // @ts-ignore
+    model: tabsData.value[index].graph,
+    background: {
+      color: '#F8F9FA',
+    },
+    frozen: true,
+    async: true,
+    gridSize: 10,
+    cellViewNamespace: shapes
+  });
+  const scroller = new ui.PaperScroller({
+    paper,
+    baseWidth: 10,
+    baseHeight: 10,
+    autoResizePaper: true,
+    contentOptions: {
+      minWidth: 600,
+      allowNewOrigin: 'any',
+      allowNegativeBottomRight: true,
+      useModelGeometry: true,
+      padding: 100
+    },
+    cursor: 'grab'
+  });
+
+
+  const currentPanel = panelRefs.value.find((panel) => panel.$attrs.val === selectedTab.value);
+
+  currentPanel.$el.appendChild(scroller.el);
+  scroller.render().adjustPaper();
+
+  paper.on('element:link', (elementView: dia.ElementView, evt: dia.Event) => {
+    const { subgraphId } = elementView.model.attributes;
+    if (!subgraphId) return;
+    evt.stopPropagation();
+    selectGraph(subgraphId);
+  });
+
+  paper.on('blank:pointerdown', (evt) => {
+    scroller.startPanning(evt);
+  });
+
+  currentTab.graph.getElements().forEach((element) => {
+    HyperlinkHighlighter.addToLabel(element, paper, 'subgraphId');
+  });
+
+  if (currentTab.focusPoint) {
+    scroller.center(currentTab.focusPoint.x, currentTab.focusPoint.y);
+  } else {
     scroller.center();
-    paper.unfreeze();
   }
+
+  paper.unfreeze();
 }
 </script>
 
-<style lang="scss">
-  @import "~@clientio/rappid/rappid.css";
+<template>
+  <tabs v-model="selectedTab" @update:modelValue="tabChanged" class="tabs-wrapper">
+    <tab v-for="(tab, i) in tabsData" :key='`tab-${i}`' :val="i" class="tab" :class="{ 'is-active': isTabActive(i) }">
+      {{tab.title}}
+      <button @click="() => removeTab(i)" class="remove-btn" :data-tooltip="`Remove ${tab.title} tab`" data-tooltip-position="top">&#10060;</button>
+    </tab>
+    <button @click="addTab" class="add-btn" data-tooltip="Add a new tab" data-tooltip-position="top">+</button>
+  </tabs>
+  <tab-panels
+    v-model="selectedTab"
+  >
+    <tab-panel
+      v-for="(tab, i) in tabsData"
+      :key="`panel-${i}`"
+      :val="i"
+      ref="panelRefs"
+    >
+      <h2>{{ tab.title }}</h2>
+    </tab-panel>
+  </tab-panels>
+</template>
 
-  body {
-  height: 100vh;
-  box-sizing: border-box;
-  margin: 0;
-
-    .canvas {
-      width: 100%;
-      height: 100%;
-
-      .joint-paper {
-          border: 1px solid #A0A0A0;
-      }
-    }
-  }
-</style>
+<style lang="scss" src="./style.scss" />
