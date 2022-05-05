@@ -108,7 +108,13 @@ const appendGraph = async (index: number) => {
     frozen: true,
     async: true,
     gridSize: 10,
-    cellViewNamespace: shapes
+    cellViewNamespace: shapes,
+    defaultConnectionPoint: {
+      name: 'boundary',
+        args: {
+          offset: 0
+        }
+    }
   });
   const scroller = new ui.PaperScroller({
     paper,
