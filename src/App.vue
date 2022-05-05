@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, shallowRef, onMounted, nextTick } from 'vue'
 import { Tabs, Tab, TabPanels, TabPanel } from 'vue3-tabs';
 import { TabsDataRaw } from './tabs-data';
 import { dia, ui, shapes, util, g } from '@clientio/rappid';
@@ -32,7 +32,7 @@ onMounted(() => {
 });
 
 const selectedTab = ref(0);
-const tabsData = ref<TabData[]>([]);
+const tabsData = shallowRef<TabData[]>([]);
 const panelRefs = ref<InstanceType<typeof TabPanel>[]>([]);
 
 /**
