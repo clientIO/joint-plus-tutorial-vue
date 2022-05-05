@@ -20,10 +20,18 @@ body {
   }
 }
 
-#app {
+#root {
+  height: 100%;
+}
+
+.wrapper {
   height: 100%;
   display: flex;
   flex-direction: column;
+  
+  .joint-tooltip {
+    color: #ffffff;
+  }
 }
 
 .tabs-wrapper {
@@ -106,6 +114,10 @@ body {
   .tab-panel {
     height: 100%;
     position: relative;
+
+    .joint-paper {
+      border: 1px solid lightgray;
+    }
   }
 
   h2 {

@@ -11,18 +11,17 @@ interface TabData {
   focusPoint?: g.PlainPoint
 }
 
+const app = ref(null);
 const theme = 'material';
 
 onMounted(() => {
   appendGraph(0);
-  const appEl = document.querySelector('#app');
-
-  if (!appEl) return;
+  if (!app.value) return;
 
   new ui.Tooltip({
     theme,
-    rootTarget: appEl,
-    container: appEl,
+    rootTarget: app.value,
+    container: app.value,
     target: '[data-tooltip]',
     direction: ui.Tooltip.TooltipArrowPosition.Auto,
     position: ui.Tooltip.TooltipPosition.Top,
@@ -163,12 +162,13 @@ const appendGraph = async (index: number) => {
 </script>
 
 <template>
-  <tabs v-model="selectedTab" @update:modelValue="tabChanged" class="tabs-wrapper">
-    <tab v-for="(tab, i) in tabsData" :key='`tab-${i}`' :val="i" class="tab" :class="{ 'is-active': isTabActive(i) }">
-      {{tab.title}}
-      <button @click="() => removeTab(i)" class="remove-btn" :data-tooltip="`Remove ${tab.title} tab`" data-tooltip-position="top">&#10060;</button>
-    </tab>
-    <button @click="addTab" class="add-btn" data-tooltip="Add a new tab" data-tooltip-position="top">+</button>
+  <div class="wrapper" ref="app">
+    <tabs v-model="selectedTab" @update:modelValue="tabChanged" class="tabs-wrapper">
+      <tab v-for="(tab, i) in tabsData" :key='`tab-${i}`' :val="i" class="tab" :class="{ 'is-active': isTabActive(i) }">
+        {{tab.title}}
+        <button @click="() => removeTab(i)" class="remove-btn" :data-tooltip="`Remove ${tab.title} tab`" data-tooltip-position="top">&#10060;</button>
+      </tab>
+      <button @click="addTab" class="add-btn" data-tooltip="Add a new tab" data-tooltip-position="top">+</button>
   </tabs>
   <tab-panels
     v-model="selectedTab"
@@ -179,9 +179,10 @@ const appendGraph = async (index: number) => {
       :val="i"
       ref="panelRefs"
     >
-      <h2>{{ tab.title }}</h2>
-    </tab-panel>
-  </tab-panels>
+        <h2>{{ tab.title }}</h2>
+      </tab-panel>
+    </tab-panels>
+  </div>
 </template>
 
 <style lang="scss" src="./style.scss" />
