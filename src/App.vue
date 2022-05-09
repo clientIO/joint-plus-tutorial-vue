@@ -1,63 +1,66 @@
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
+import { dia, ui, shapes } from '@clientio/rappid';
+
+const canvas = ref(null);
+const graph = new dia.Graph({}, { cellNamespace: shapes })
+const paper = new dia.Paper({
+  model: graph,
+  background: {
+    color: '#F8F9FA',
+  },
+  frozen: true,
+  async: true,
+  cellViewNamespace: shapes
+});
+
+const scroller = new ui.PaperScroller({
+  paper,
+  autoResizePaper: true,
+  contentOptions: {
+    minWidth: 600,
+    allowNegativeBottomRight: true,
+    useModelGeometry: true,
+    padding: 100
+  },
+  cursor: 'grab'
+});
+
+scroller.render().adjustPaper();
+
+const rect1 = new shapes.standard.Rectangle({
+  position: { x: 300, y: 300 }, 
+  size: { width: 100, height: 50 },
+  attrs: {
+    label: {
+      text: 'Hello'
+    }
+  }
+});
+
+const rect2 = rect1.clone().position(500, 300).attr('label/text', 'World');
+
+const link = new shapes.standard.Link();
+link.source(rect1).target(rect2);
+
+graph.addCells([rect1, rect2, link]);
+
+onMounted(() => {
+  if (!canvas.value) return;
+  (canvas.value as HTMLDivElement).appendChild(scroller.el);
+
+  paper.on('blank:pointerdown', (evt) => {
+    scroller.startPanning(evt);
+  });
+
+  scroller.center();
+  paper.unfreeze();
+});
+</script>
+
 <template>
   <div class="canvas" ref="canvas"></div>
 </template>
-
-<script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { dia, ui, shapes } from '@clientio/rappid';
-
-@Options({})
-export default class App extends Vue {
-  declare public $refs: {
-   canvas: HTMLDivElement;
-  }
-
-  private graph: dia.Graph;
-  private paper: dia.Paper;
-  private scroller: ui.PaperScroller;
-
-  public created(): void {
-    const graph = this.graph = new dia.Graph({}, { cellNamespace: shapes });
-
-    const paper = this.paper = new dia.Paper({
-        model: graph,
-        background: {
-            color: '#F8F9FA',
-        },
-        frozen: true,
-        async: true,
-        cellViewNamespace: shapes
-    });
-
-    const scroller = this.scroller = new ui.PaperScroller({
-        paper,
-        autoResizePaper: true,
-        cursor: 'grab'
-    });
-
-    scroller.render();
-
-    const rect = new shapes.standard.Rectangle({
-        position: { x: 100, y: 100 },
-        size: { width: 100, height: 50 },
-        attrs: {
-            label: {
-                text: 'Hello World'
-            }
-        }
-    });
-
-    this.graph.addCell(rect);
-  }
-
-  public mounted(): void {
-    const { scroller, paper, $refs : { canvas } } = this;
-    canvas.appendChild(this.scroller.el);
-    scroller.center();
-    paper.unfreeze();
-  }
-}
-</script>
 
 <style lang="scss">
   @import "~@clientio/rappid/rappid.css";
@@ -67,12 +70,16 @@ export default class App extends Vue {
   box-sizing: border-box;
   margin: 0;
 
+    #app {
+      height: 100%;
+    }
+
     .canvas {
       width: 100%;
       height: 100%;
 
       .joint-paper {
-          border: 1px solid #A0A0A0;
+        border: 1px solid #A0A0A0;
       }
     }
   }

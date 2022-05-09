@@ -9,8 +9,7 @@
   "dependencies": {
     "@clientio/rappid": "file:rappid.tgz",
     "core-js": "^3.6.5",
-    "vue": "^3.0.0",
-    "vue-class-component": "^8.0.0-0"
+    "vue": "^3.0.0"
   },
   "devDependencies": {
     "@types/backbone": "latest",
