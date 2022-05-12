@@ -166,7 +166,7 @@ const appendGraph = async (index: number) => {
     <tabs v-model="selectedTab" @update:modelValue="tabChanged" class="tabs-wrapper">
       <tab v-for="(tab, i) in tabsData" :key='`tab-${i}`' :val="i" class="tab" :class="{ 'is-active': isTabActive(i) }">
         {{tab.title}}
-        <button @click="() => removeTab(i)" class="remove-btn" :data-tooltip="`Remove ${tab.title} tab`" data-tooltip-position="top">&#10060;</button>
+        <button @click="() => removeTab(i)" class="remove-btn" :data-tooltip='`Remove "${tab.title}" tab`' data-tooltip-position="top">&#10060;</button>
       </tab>
       <button @click="addTab" class="add-btn" data-tooltip="Add a new tab" data-tooltip-position="top">+</button>
   </tabs>
