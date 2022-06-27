@@ -1,86 +1,196 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import { dia, ui, shapes } from '@clientio/rappid';
+import TreeView from './TreeView.vue';
+import { ref, onMounted, shallowRef, triggerRef } from 'vue';
+import { dia, ui, shapes, highlighters } from '@clientio/rappid';
+import treeData from './tree-data';
 
 const canvas = ref(null);
 const graph = new dia.Graph({}, { cellNamespace: shapes })
 const paper = new dia.Paper({
   model: graph,
-  background: {
-    color: '#F8F9FA',
-  },
-  frozen: true,
   async: true,
-  cellViewNamespace: shapes
+  frozen: true,
+  cellViewNamespace: shapes,
+  clickThreshold: 10,
+  moveThreshold: 10,
+  interactive: false,
+  defaultConnectionPoint: {
+    name: 'boundary'
+  }
 });
 
 const scroller = new ui.PaperScroller({
   paper,
   autoResizePaper: true,
+  cursor: 'grab',
+  baseWidth: 1,
+  baseHeight: 1,
+  padding: 0,
   contentOptions: {
-    minWidth: 600,
-    allowNegativeBottomRight: true,
     useModelGeometry: true,
-    padding: 100
-  },
-  cursor: 'grab'
-});
-
-scroller.render().adjustPaper();
-
-const rect1 = new shapes.standard.Rectangle({
-  position: { x: 300, y: 300 }, 
-  size: { width: 100, height: 50 },
-  attrs: {
-    label: {
-      text: 'Hello'
-    }
+    padding: 200
   }
 });
 
-const rect2 = rect1.clone().position(500, 300).attr('label/text', 'World');
+const parsedData = treeData.map(diagram => {
+  const graph = new dia.Graph({}, { cellNamespace: shapes });
+  graph.fromJSON(diagram);
+  return {
+    id: diagram.id,
+    name: diagram.name,
+    graph,
+    nodes: graph.getCells().map(cell => {
+      return {
+        id: `${diagram.id}-${cell.id}`,
+        name: cell.isElement()
+          ? cell.attr(['label', 'text']) || `Element (${cell.id})`
+          : cell.prop(['labels', 0, 'attrs', 'text', 'text']) || `Link (${cell.id})`,
+        isElement: cell.isElement(),
+      }
+    })
+  }
+});
 
-const link = new shapes.standard.Link();
-link.source(rect1).target(rect2);
-
-graph.addCells([rect1, rect2, link]);
+const data = shallowRef(parsedData);
+const activeId = ref(data.value[0].id);
 
 onMounted(() => {
   if (!canvas.value) return;
+
   (canvas.value as HTMLDivElement).appendChild(scroller.el);
 
-  paper.on('blank:pointerdown', (evt) => {
-    scroller.startPanning(evt);
-  });
-
-  scroller.center();
+  scroller.render().centerContent({ useModelGeometry: true });
   paper.unfreeze();
 });
+
+const onActiveItemChange = (id: string, diagram: dia.Graph) => {
+
+  const [diagramId, cellId = null] = id.split('-');
+  const [prevDiagramId] = activeId.value.split('-');
+
+  if (diagramId !== prevDiagramId) {
+    console.log('switching diagrams');
+    const prevDiagramIndex = data.value.findIndex((diagram) => diagram.id === prevDiagramId);
+
+    // Save Changes (not in use since the demo is in view-only mode)
+    if (prevDiagramIndex !== -1) {
+        const json = graph.toJSON();
+        data.value[prevDiagramIndex].graph.fromJSON(json);
+        data.value[prevDiagramIndex].nodes = graph.getCells().map(cell => {
+          return {
+            id: `${graph.id}-${cell.id}`,
+            name: cell.isElement()
+              ? cell.attr(['label', 'text']) || `Element (${cell.id})`
+              : cell.prop(['labels', 0, 'attrs', 'text', 'text']) || `Link (${cell.id})`,
+            isElement: cell.isElement(),
+          }
+        });
+      triggerRef(data);
+    }
+  }
+
+  activeId.value = id;
+  graph.fromJSON(diagram.toJSON())
+  scroller.render().centerContent({ useModelGeometry: true });
+  graph.set('selectedCell', cellId);
+  highlightCell();
+};
+
+// User Interactions
+paper.on('cell:pointerclick', (cellView) => {
+  const cell = cellView.model;
+  graph.set('selectedCell', cell.id);
+  activeId.value = `${graph.id}-${cell.id}`;
+});
+
+paper.on('blank:pointerclick', () => {
+  graph.set('selectedCell', null);
+  activeId.value = graph.id.toString();
+});
+
+paper.on('blank:pointerdown', (evt) => scroller.startPanning(evt));
+
+// Selection Frame
+let selectionFrame: highlighters.mask | null = null;
+
+const highlightCell = () => {
+  if (selectionFrame) {
+    selectionFrame.remove();
+    selectionFrame = null;
+  }
+
+  const cellId = graph.get('selectedCell');
+  const cell = graph.getCell(cellId);
+
+  if (cell) {
+    selectionFrame = highlighters.mask.add(
+      cell.findView(paper),
+      cell.isLink() ? 'line' : 'body',
+      'selection-frame',
+      {
+        layer: dia.Paper.Layers.BACK,
+        padding: 4,
+        attrs: {
+          'stroke-width': 2,
+          'stroke-linecap': 'round',
+          'opacity': '0.6'
+        }
+      }
+    );
+  }
+}
+
+paper.listenTo(graph, 'change:selectedCell', highlightCell);
 </script>
 
 <template>
+  <TreeView :data="data" :active-id="activeId" @active-item-change="onActiveItemChange" />
   <div class="canvas" ref="canvas"></div>
 </template>
 
 <style lang="scss">
   @import "~@clientio/rappid/rappid.css";
 
-  body {
-  height: 100vh;
-  box-sizing: border-box;
-  margin: 0;
-
-    #app {
-      height: 100%;
-    }
-
-    .canvas {
-      width: 100%;
-      height: 100%;
-
-      .joint-paper {
-        border: 1px solid #A0A0A0;
-      }
-    }
+  * {
+    box-sizing: border-box;
+    line-height: 1.5;
+    font-weight: 400;
+    font-size: 1rem;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
   }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  #app {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+  }
+
+  .canvas {
+    flex-grow: 1;
+    max-height: 100%;
+  }
+
+  .joint-paper {
+    .joint-highlight-mask {
+        fill: #08B081;
+    }
+
+    // Arrowheads
+    marker path {
+        stroke: #08B081;
+        fill: #08B081;
+    }
+
+    .joint-link [joint-selector="line"],
+    .joint-element ellipse,
+    .joint-element path,
+    .joint-element rect {
+        stroke: #08B081;
+    }
+}
 </style>
