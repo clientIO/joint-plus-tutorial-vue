@@ -1,9 +1,22 @@
 <script lang="ts" setup>
 import TreeItem from './TreeItem.vue';
-import { defineProps } from 'vue';
 import { dia } from '@clientio/rappid';
 
-const props = defineProps(['data', 'activeId']);
+interface Diagram {
+  id: string,
+  name: string,
+  graph: dia.Graph,
+  nodes: {
+    id: string,
+    name: string,
+    isElement: boolean,
+  }[]
+}
+
+const props = defineProps<{
+  data: Diagram[],
+  activeId: string
+}>();
 
 const emit = defineEmits<{
   (e: 'activeItemChange', id: string, graph: dia.Graph): void

@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { defineProps, defineEmits, ref, watch, toRefs } from 'vue';
+import { ref, watch, toRefs } from 'vue';
 import { dia } from '@clientio/rappid';
 import ChevronRight from 'vue-material-design-icons/ChevronRight.vue';
 
-interface child {
+interface Child {
   id: string,
   name: string,
   isElement: boolean,
@@ -13,7 +13,7 @@ const props = defineProps<{
   id: string,
   activeId: string,
   title: string,
-  children: child[],
+  children: Child[],
   graph: dia.Graph
 }>();
 
