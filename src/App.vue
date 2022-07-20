@@ -26,6 +26,7 @@ export default class App extends Vue {
         },
         frozen: true,
         async: true,
+        sorting: dia.Paper.sorting.APPROX,
         cellViewNamespace: shapes
     });
 
