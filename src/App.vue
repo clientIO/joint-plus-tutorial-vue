@@ -47,13 +47,13 @@ onMounted(() => {
   <div class="canvas" ref="canvas"></div>
 </template>
 
-<style scope>
+<style scoped>
 .canvas {
   width: 100%;
   height: 100%;
 }
 
-.joint-paper {
+.canvas:deep(.joint-paper) {
   border: 1px solid #a0a0a0;
 }
 </style>
