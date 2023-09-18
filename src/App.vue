@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { dia, ui, shapes } from '@clientio/rappid';
+import { dia, ui, shapes } from '@clientio/rappid/rappid.js';
 
 const canvas = ref<Element | null>(null);
 
-const graph = new dia.Graph();
+const graph = new dia.Graph({}, {
+  cellNamespace: shapes
+});
 const paper = new dia.Paper({
   model: graph,
   background: {
