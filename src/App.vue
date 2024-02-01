@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { dia, ui, shapes } from '@clientio/rappid/rappid.js';
+import { dia, ui, shapes } from '@joint/plus';
 
 const canvas = ref<Element | null>(null);
 
