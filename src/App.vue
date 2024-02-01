@@ -2,7 +2,7 @@
 import { ref, shallowRef, onMounted, nextTick, triggerRef } from 'vue'
 import { Tabs, Tab, TabPanels, TabPanel } from 'vue3-tabs';
 import { TabsDataRaw } from './tabs-data';
-import { dia, ui, shapes, util, g } from '@clientio/rappid';
+import { dia, ui, shapes, util, g } from '@joint/plus';
 import HyperlinkHighlighter from './hyperlink-highlighter';
 
 interface TabData {
