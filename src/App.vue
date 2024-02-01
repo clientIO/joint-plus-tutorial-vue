@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import { dia, ui, shapes } from '@clientio/rappid';
+import { dia, ui, shapes } from '@joint/plus';
 
 const canvas = ref(null);
 const graph = new dia.Graph({}, { cellNamespace: shapes })
@@ -63,7 +63,7 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-  @import "~@clientio/rappid/rappid.css";
+  @import "~@joint/plus/joint-plus.css";
 
   body {
   height: 100vh;
