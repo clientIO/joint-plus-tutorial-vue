@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import TreeItem from './TreeItem.vue';
-import { dia } from '@clientio/rappid';
+import { dia } from '@joint/plus';
 
 interface Diagram {
   id: string,
@@ -32,7 +32,7 @@ const activeItemChange = (id: string, graph: dia.Graph) => emit('activeItemChang
 </template>
 
 <style lang="scss">
-  @import "~@clientio/rappid/rappid.css";
+  @import "~@joint/plus/joint-plus.css";
 
   .wrapper {
     min-width: 200px;
