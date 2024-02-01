@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch, toRefs } from 'vue';
-import { dia } from '@clientio/rappid';
+import { dia } from '@joint/plus';
 import ChevronRight from 'vue-material-design-icons/ChevronRight.vue';
 
 interface Child {

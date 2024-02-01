@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import TreeView from './TreeView.vue';
 import { ref, onMounted, shallowRef, triggerRef } from 'vue';
-import { dia, ui, shapes, highlighters } from '@clientio/rappid';
+import { dia, ui, shapes, highlighters } from '@joint/plus';
 import treeData from './tree-data';
 
 const canvas = ref(null);
@@ -149,7 +149,7 @@ paper.listenTo(graph, 'change:selectedCell', highlightCell);
 </template>
 
 <style lang="scss">
-  @import "~@clientio/rappid/rappid.css";
+  @import "~@joint/plus/joint-plus.css";
 
   * {
     box-sizing: border-box;
