@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { dia, ui, shapes } from '@clientio/rappid';
+import { dia, ui, shapes } from '@joint/plus';
 
 @Component({})
 export default class App extends Vue {
@@ -61,20 +61,20 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
-@import "~@clientio/rappid/rappid.css";
+@import "~@joint/plus/joint-plus.css";
 
 body {
     height: 100vh;
     box-sizing: border-box;
     margin: 0;
 
-.canvas {
-    width: 100%;
-    height: 100%;
+    .canvas {
+        width: 100%;
+        height: 100%;
 
-    .joint-paper {
-        border: 1px solid #A0A0A0;
+        .joint-paper {
+            border: 1px solid #A0A0A0;
+        }
     }
- }
 }
 </style>

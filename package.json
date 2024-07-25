@@ -1,5 +1,5 @@
 {
-  "name": "rappid-tutorial-vue3",
+  "name": "joint-plus-tutorial-vue2",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@clientio/rappid": "file:rappid.tgz",
+    "@joint/plus": "file:joint-plus.tgz",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",

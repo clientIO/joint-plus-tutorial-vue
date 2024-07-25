@@ -4,7 +4,7 @@ This git repository is intended for instructional purposes. It is the Vue versio
 
 ### Prerequisites  
 
-To run the following code, you will need a [JointJS+ license](https://www.jointjs.com/license) that comes with the JointJS+ installable package file `rappid.tgz`.
+To run the following code, you will need a [JointJS+ license](https://www.jointjs.com/license) that comes with the JointJS+ installable package file `joint-plus.tgz`.
 
 ### Dependencies
 
@@ -18,16 +18,16 @@ Make sure you have the following dependencies installed on your system:
 Clone this repository.
 
 ```
-git clone git@github.com:clientIO/rappid-tutorial-vue3.git
+git clone git@github.com:clientIO/joint-plus-tutorial-vue.git
 ```
 
-Change into the `rappid-tutorial-vue3` directory.
+Change into the `joint-plus-tutorial-vue` directory.
 
 ```
-cd rappid-tutorial-vue3
+cd joint-plus-tutorial-vue3
 ```
 
-For this tutorial, you need to place your own `rappid.tgz` file in the root directory.
+For this tutorial, you need to place your own `joint-plus.tgz` file in the root directory.
 
 When that is completed, you can install the dependencies.
 
