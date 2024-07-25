@@ -24,7 +24,7 @@ git clone git@github.com:clientIO/joint-plus-tutorial-vue.git
 Change into the `joint-plus-tutorial-vue` directory.
 
 ```
-cd joint-plus-tutorial-vue3
+cd joint-plus-tutorial-vue
 ```
 
 For this tutorial, you need to place your own `joint-plus.tgz` file in the root directory.
